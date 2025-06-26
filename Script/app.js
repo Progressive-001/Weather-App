@@ -9,36 +9,26 @@ const icon =  document.querySelector('.icon img');
 
 const updateUI = (data) => {
 
-  // const cityDetails = data.cityDetails;
-  // const weather = data.weather;
-
   //Destructing properties (Much more concise)
-  const {cityDetails, weather} = data;
+  const current = data.current;
 
   // Update details template
   details.innerHTML =`
-    <h5 class="my-3">${cityDetails.EnglishName}</h5>
-    <div class="my-3">${weather.WeatherText}</div>
+    <h5 class="my-3">${current.location.name}</h5>
+    <div class="my-3">${current.current.condition.text}</div>
     <div class="display-4 my-4">
-      <span>${weather.Temperature.Metric.Value}</span>
+      <span>${current.current.temp_c}</span>
       <span>&deg;C</span>
     </div>
   `;
 
   // Update the night / day & icon images
-  const iconSrc = `./img/icons/${weather.WeatherIcon}.svg`
+  const iconSrc = `${current.current.condition.icon}`
   icon.setAttribute('src', iconSrc);
 
-  // let timeSrc = null;
-
-  // if (weather.IsDayTime){
-  //   timeSrc = './img/day.svg';
-  // }else{
-  //   timeSrc = './img/night.svg';
-  // }
 
   // Ternary Operator (Much more concise)
-  let timeSrc = weather.IsDayTime ?  './img/day.svg' : './img/night.svg';
+  let timeSrc = current.current.is_day ?  './img/day.svg' : './img/night.svg';
   time.setAttribute('src', timeSrc);
 
 
@@ -46,34 +36,43 @@ const updateUI = (data) => {
   if (card.classList.contains('d-none')){
     card.classList.remove('d-none');
   }
-
 };
 
 
 
 const updateCity = async (city) =>{
 
-  const cityDetails = await getCity(city);
+  const current = await getCity(city);
 
-  const weather = await getWeather(cityDetails.Key);
-
+  
   return{
-    cityDetails: cityDetails,
-    weather: weather
+    current: current
   };
 
 };
 
 cityForm.addEventListener('submit', (e) => {
   // Prevent default action
- e.preventDefault();
+  e.preventDefault();
 
  // Get city value
  const city = cityForm.city.value.trim()
  cityForm.reset();
 
+
  // Update the ui with new city
  updateCity(city)
     .then(data => updateUI(data))
     .catch(err => console.log(err));
+
+  // Set Local Storage
+  localStorage.setItem('city', city);
+
 });
+
+
+if (localStorage.getItem('city')){
+   updateCity(localStorage.getItem('city'))
+    .then((data) => updateUI(data))
+    .catch((err) => console.log(err))
+}
