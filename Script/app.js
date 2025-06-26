@@ -9,7 +9,7 @@ const icon =  document.querySelector('.icon img');
 
 const updateUI = (data) => {
 
-  //Destructing properties (Much more concise)
+ 
   const current = data.current;
 
   // Update details template
